@@ -75,7 +75,7 @@ jobs:
             ### 📚 Documentation
             - **API Docs:** https://docs.rs/cardano-crypto
             - **Crates.io:** https://crates.io/crates/cardano-crypto
-            - **Repository:** https://github.com/FractionEstate/Cardano-KES
+            - **Repository:** https://github.com/FractionEstate/cardano-crypto
 
             ### ✨ Features
             - VRF (Verifiable Random Functions) - Draft-03 & Draft-13
