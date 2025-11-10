@@ -175,7 +175,7 @@ fn expand_message_xmd(dst: &[u8], msg: &[u8], len_in_bytes: usize) -> Vec<u8> {
     const B_IN_BYTES: usize = 64; // SHA-512 output size
     const R_IN_BYTES: usize = 128; // SHA-512 block size
 
-    let ell = (len_in_bytes + B_IN_BYTES - 1) / B_IN_BYTES;
+    let ell = len_in_bytes.div_ceil(B_IN_BYTES);
 
     // DST_prime = DST || I2OSP(len(DST), 1)
     let mut dst_prime = dst.to_vec();
@@ -189,17 +189,17 @@ fn expand_message_xmd(dst: &[u8], msg: &[u8], len_in_bytes: usize) -> Vec<u8> {
 
     // b_0 = H(Z_pad || msg || l_i_b_str || I2OSP(0, 1) || DST_prime)
     let mut hasher = Sha512::new();
-    hasher.update(&z_pad);
+    hasher.update(z_pad);
     hasher.update(msg);
-    hasher.update(&l_i_b_str);
-    hasher.update(&[0u8]);
+    hasher.update(l_i_b_str);
+    hasher.update([0u8]);
     hasher.update(&dst_prime);
     let b_0 = hasher.finalize();
 
     // b_1 = H(b_0 || I2OSP(1, 1) || DST_prime)
     let mut hasher = Sha512::new();
-    hasher.update(&b_0);
-    hasher.update(&[1u8]);
+    hasher.update(b_0);
+    hasher.update([1u8]);
     hasher.update(&dst_prime);
     let mut b_i = hasher.finalize();
 
@@ -213,8 +213,8 @@ fn expand_message_xmd(dst: &[u8], msg: &[u8], len_in_bytes: usize) -> Vec<u8> {
         for j in 0..B_IN_BYTES {
             xor_result[j] = b_0[j] ^ b_i[j];
         }
-        hasher.update(&xor_result);
-        hasher.update(&[i as u8]);
+        hasher.update(xor_result);
+        hasher.update([i as u8]);
         hasher.update(&dst_prime);
         b_i = hasher.finalize();
         uniform_bytes.extend_from_slice(&b_i);
@@ -304,7 +304,7 @@ pub fn cardano_hash_to_curve_draft13(
             // Fallback with retry using first 32 bytes as seed
             for i in 0..=255u8 {
                 let mut retry_hasher = Sha512::new();
-                retry_hasher.update(&point_bytes);
+                retry_hasher.update(point_bytes);
                 retry_hasher.update([i]);
                 let retry_hash = retry_hasher.finalize();
 
