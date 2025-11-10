@@ -1,5 +1,8 @@
 //! Common error types for all cryptographic operations
 
+#[cfg(not(feature = "thiserror"))]
+use core::fmt;
+
 /// Alias for backward compatibility
 pub type Result<T> = core::result::Result<T, CryptoError>;
 
@@ -79,6 +82,7 @@ pub enum CryptoError {
     CryptoFailure,
 
     /// KES-specific error
+    #[cfg(feature = "kes")]
     #[cfg_attr(feature = "thiserror", error("KES error: {0}"))]
     KesError(crate::kes::KesError),
 
@@ -108,6 +112,7 @@ impl fmt::Display for CryptoError {
             CryptoError::SerializationError => write!(f, "Serialization error"),
             CryptoError::DeserializationError => write!(f, "Deserialization error"),
             CryptoError::CryptoFailure => write!(f, "Cryptographic operation failed"),
+            #[cfg(feature = "kes")]
             CryptoError::KesError(e) => write!(f, "KES error: {}", e),
             CryptoError::Other(msg) => write!(f, "{}", msg),
         }
