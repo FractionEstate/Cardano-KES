@@ -143,7 +143,7 @@ impl VrfDraft03 {
     ///
     /// # Errors
     ///
-    /// Returns [`CryptoError`] if:
+    /// Returns [`crate::common::error::CryptoError`] if:
     /// - Secret key is malformed or invalid
     /// - Internal cryptographic operations fail (extremely rare)
     ///
@@ -196,7 +196,7 @@ impl VrfDraft03 {
     ///
     /// # Errors
     ///
-    /// Returns [`CryptoError`] if:
+    /// Returns [`crate::common::error::CryptoError`] if:
     /// - `InvalidPublicKey`: Public key is malformed or not on the curve
     /// - `InvalidProof`: Proof is malformed, wrong length, or contains invalid data
     /// - `VerificationFailed`: Proof is well-formed but cryptographically invalid
@@ -246,7 +246,7 @@ impl VrfDraft03 {
     ///
     /// # Errors
     ///
-    /// Returns [`CryptoError::InvalidProof`] if the proof is malformed
+    /// Returns [`crate::common::error::CryptoError::InvalidProof`] if the proof is malformed
     ///
     /// # Examples
     ///

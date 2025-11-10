@@ -85,7 +85,7 @@ impl std::error::Error for KesError {}
 /// Trait for KES algorithms
 ///
 /// Follows the design from "Composition and Efficiency Tradeoffs for Forward-Secure Digital Signatures"
-/// by Tal Malkin, Daniele Micciancio, and Sara Miner (https://eprint.iacr.org/2001/034).
+/// by Tal Malkin, Daniele Micciancio, and Sara Miner (<https://eprint.iacr.org/2001/034>).
 pub trait KesAlgorithm {
     /// Verification key type
     type VerificationKey;

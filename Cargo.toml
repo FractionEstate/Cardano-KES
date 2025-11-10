@@ -3,14 +3,21 @@ name = "cardano-crypto"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.91"
-authors = ["FractionEstate"]
+authors = ["FractionEstate <contact@fractionestate.io>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/FractionEstate/Cardano-Crypto"
+repository = "https://github.com/FractionEstate/Cardano-KES"
 documentation = "https://docs.rs/cardano-crypto"
-description = "Pure Rust implementation of Cardano cryptographic primitives (VRF, KES, DSIGN, Hash)"
+homepage = "https://github.com/FractionEstate/Cardano-KES"
+description = "Pure Rust implementation of Cardano cryptographic primitives (VRF, KES, DSIGN, Hash) with 100% compatibility with cardano-node"
 keywords = ["cardano", "cryptography", "vrf", "kes", "blockchain"]
 categories = ["cryptography", "no-std"]
 readme = "README.md"
+exclude = [
+    "/.github",
+    "/target",
+    "*.profraw",
+    "*.profdata",
+]
 
 [features]
 default = ["std", "thiserror", "vrf", "kes", "dsign", "hash"]
@@ -68,6 +75,8 @@ serde_json = "1.0"
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+default-target = "x86_64-unknown-linux-gnu"
+targets = ["x86_64-unknown-linux-gnu", "wasm32-unknown-unknown"]
 
 [[example]]
 name = "vrf_basic"

@@ -1,0 +1,90 @@
+name: Publish to crates.io
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Verify tag matches Cargo.toml version
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          CARGO_VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
+            exit 1
+          fi
+          echo "Version verified: $TAG_VERSION"
+
+      - name: Run tests
+        run: cargo test --all-features --verbose
+
+      - name: Build release
+        run: cargo build --release --all-features --verbose
+
+      - name: Verify package
+        run: cargo package --allow-dirty --verbose
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --allow-dirty --token ${CARGO_REGISTRY_TOKEN}
+
+      - name: Wait for crates.io propagation
+        run: sleep 30
+
+      - name: Verify publication
+        run: |
+          for i in {1..10}; do
+            if cargo search cardano-crypto | grep -q "cardano-crypto ="; then
+              echo "✓ Package successfully published to crates.io"
+              exit 0
+            fi
+            echo "Waiting for crates.io to update... ($i/10)"
+            sleep 10
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          body: |
+            ## 🎉 Cardano Crypto ${{ github.ref_name }}
+
+            Pure Rust implementation of Cardano cryptographic primitives.
+
+            ### 📦 Installation
+            ```toml
+            [dependencies]
+            cardano-crypto = "${{ github.ref_name }}"
+            ```
+
+            ### 📚 Documentation
+            - **API Docs:** https://docs.rs/cardano-crypto
+            - **Crates.io:** https://crates.io/crates/cardano-crypto
+            - **Repository:** https://github.com/FractionEstate/Cardano-KES
+
+            ### ✨ Features
+            - VRF (Verifiable Random Functions) - Draft-03 & Draft-13
+            - KES (Key Evolving Signatures) - SingleKES, Sum2KES, Sum6KES
+            - DSIGN (Digital Signatures) - Ed25519
+            - Hash Functions - Blake2b, SHA-2, RIPEMD-160, Keccak
+            - CBOR Serialization
+            - no_std support
+
+            See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -10,10 +10,12 @@ Cargo.lock
 *.swp
 *.swo
 *~
+.DS_Store
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Documentation
 /target/doc/
@@ -21,3 +23,14 @@ Thumbs.db
 # Testing
 *.profraw
 *.profdata
+tarpaulin-report.html
+cobertura.xml
+
+# CI/CD
+.cargo/
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.orig

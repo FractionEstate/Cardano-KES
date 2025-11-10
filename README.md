@@ -1,22 +1,15 @@
-# Cardano Crypto - Pure Rust Implementation# Cardano KES - Pure Rust Implementation
+# Cardano Crypto - Pure Rust Implementation
 
+[![Crates.io](https://img.shields.io/crates/v/cardano-crypto.svg)](https://crates.io/crates/cardano-crypto)
+[![Documentation](https://docs.rs/cardano-crypto/badge.svg)](https://docs.rs/cardano-crypto)
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
+[![Rust](https://img.shields.io/badge/rust-1.91%2B-orange.svg)](https://www.rust-lang.org)
+[![CI](https://github.com/FractionEstate/Cardano-KES/workflows/CI/badge.svg)](https://github.com/FractionEstate/Cardano-KES/actions)
 
+Pure Rust implementation of Cardano cryptographic primitives, providing a unified interface for **VRF** (Verifiable Random Functions), **KES** (Key Evolving Signatures), **DSIGN** (Digital Signatures), and **Hash** algorithms.
 
-[![Crates.io](https://img.shields.io/crates/v/cardano-crypto.svg)](https://crates.io/crates/cardano-crypto)[![Crates.io](https://img.shields.io/crates/v/cardano-kes.svg)](https://crates.io/crates/cardano-kes)
+This crate consolidates all Cardano cryptographic components into a single, cohesive package with zero external cryptographic dependencies. All implementations are in-house, ensuring full control, auditability, and binary compatibility with Cardano consensus requirements.
 
-[![Documentation](https://docs.rs/cardano-crypto/badge.svg)](https://docs.rs/cardano-crypto)[![Documentation](https://docs.rs/cardano-kes/badge.svg)](https://docs.rs/cardano-kes)
-
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
-
-[![Rust Version](https://img.shields.io/badge/rust-1.91%2B-blue.svg)](https://www.rust-lang.org)[![Rust](https://img.shields.io/badge/rust-1.91%2B-orange.svg)](https://www.rust-lang.org)
-
-
-
-Pure Rust implementation of Cardano cryptographic primitives, providing a unified interface for VRF (Verifiable Random Functions), KES (Key Evolving Signatures), DSIGN (Digital Signatures), and Hash algorithms.**Pure Rust implementation of Cardano Key Evolving Signatures (KES)**
-
-
-
-This crate consolidates all Cardano cryptographic components into a single, cohesive package with zero external cryptographic dependencies. All implementations are in-house, ensuring full control, auditability, and binary compatibility with Cardano consensus requirements.This crate provides a complete, production-ready implementation of Key Evolving Signature schemes used in the Cardano blockchain, extracted from `cardano-base-rust` and optimized as a standalone library.
 
 
 
