@@ -148,7 +148,7 @@ mod tests {
 // Helper for hex encoding in tests
 #[cfg(test)]
 mod hex {
-    pub fn encode(bytes: impl AsRef<[u8]>) -> String {
+    pub(crate) fn encode(bytes: impl AsRef<[u8]>) -> String {
         bytes
             .as_ref()
             .iter()

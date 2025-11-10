@@ -118,7 +118,7 @@ pub const OUTPUT_SIZE: usize = 64;
 /// let seed = [0u8; 32];
 /// let (sk, pk) = VrfDraft13::keypair_from_seed(&seed);
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct VrfDraft13;
 
 impl VrfDraft13 {

@@ -21,6 +21,7 @@ use crate::kes::{KesAlgorithm, KesError, Period};
 /// # Type Parameters
 /// * `D` - The child KES algorithm
 /// * `H` - The hash algorithm for combining verification keys
+#[derive(Debug)]
 pub struct SumKes<D, H>(PhantomData<(D, H)>)
 where
     D: KesAlgorithm,
@@ -32,6 +33,7 @@ where
 /// - `sk`: Current signing key (either left or right subtree)
 /// - `r1_seed`: Seed for generating the right subtree key (when in left subtree)
 /// - `vk0`, `vk1`: Verification keys for both subtrees
+#[derive(Debug)]
 pub struct SumSigningKey<D, H>
 where
     D: KesAlgorithm,

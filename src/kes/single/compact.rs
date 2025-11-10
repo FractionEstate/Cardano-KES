@@ -20,6 +20,7 @@ use crate::kes::{KesAlgorithm, KesError, Period};
 ///
 /// # Type Parameters
 /// * `D` - The underlying digital signature algorithm
+#[derive(Debug)]
 pub struct CompactSingleKes<D: DsignAlgorithm>(PhantomData<D>);
 
 /// Signature type that embeds the verification key

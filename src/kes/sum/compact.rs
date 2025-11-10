@@ -31,6 +31,7 @@ use crate::kes::{KesAlgorithm, Period};
 /// signature and D's VerKey. The signature for A contains B's signature and C's VerKey.
 ///
 /// This reduces storage from depth*2 keys to just depth keys.
+#[derive(Debug)]
 pub struct CompactSumKes<D, H>(PhantomData<(D, H)>)
 where
     D: KesAlgorithm,
@@ -38,6 +39,7 @@ where
     H: KesHashAlgorithm;
 
 /// Signing key for CompactSumKES.
+#[derive(Debug)]
 pub struct CompactSumSigningKey<D, H>
 where
     D: KesAlgorithm,
@@ -52,6 +54,7 @@ where
 }
 
 /// Signature for CompactSumKES - only stores the "other" verification key.
+#[derive(Debug)]
 pub struct CompactSumSignature<D, H>
 where
     D: KesAlgorithm,

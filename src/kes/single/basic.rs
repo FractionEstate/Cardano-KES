@@ -16,6 +16,7 @@ use crate::kes::{KesAlgorithm, KesError, Period};
 ///
 /// # Type Parameters
 /// * `D` - The underlying digital signature algorithm
+#[derive(Debug)]
 pub struct SingleKes<D: DsignAlgorithm>(PhantomData<D>);
 
 impl<D> KesAlgorithm for SingleKes<D>

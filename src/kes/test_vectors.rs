@@ -7,7 +7,7 @@
 mod tests {
     use crate::common::Result;
     use crate::dsign::Ed25519;
-    use crate::kes::{Blake2b256, KesAlgorithm, SingleKes, Sum2Kes, Sum6Kes};
+    use crate::kes::{KesAlgorithm, SingleKes, Sum2Kes, Sum6Kes};
 
     /// Test vector for SingleKES with Ed25519
     #[test]

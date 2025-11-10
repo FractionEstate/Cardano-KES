@@ -29,7 +29,7 @@
 use curve25519_dalek::edwards::{CompressedEdwardsY, EdwardsPoint};
 use sha2::{Digest, Sha512};
 
-use crate::common::{CryptoError, CryptoResult, ONE, SUITE_DRAFT03, SUITE_DRAFT13};
+use crate::common::{CryptoError, CryptoResult, ONE, SUITE_DRAFT03};
 
 /// Clear the cofactor from an Edwards curve point (Cardano-compatible)
 ///
