@@ -19,6 +19,30 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-git-
+
+      - name: Cache target directory
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-target-release-
+
       - name: Verify tag matches Cargo.toml version
         run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
@@ -36,10 +60,18 @@ jobs:
         run: cargo build --release --all-features --verbose
 
       - name: Verify package
-        run: cargo package --allow-dirty --verbose
+        run: cargo package --verbose
 
       - name: Publish to crates.io
-        run: cargo publish --allow-dirty --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  verify-and-release:
+    name: Verify Publication and Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: publish
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Wait for crates.io propagation
         run: sleep 30
@@ -54,9 +86,10 @@ jobs:
             echo "Waiting for crates.io to update... ($i/10)"
             sleep 10
           done
+          echo "⚠ Publication verification timed out, but package may still be available"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           body: |
