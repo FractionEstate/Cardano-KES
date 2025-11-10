@@ -17,6 +17,7 @@ use crate::common::error::{CryptoError, Result};
 pub mod hash;
 pub mod single;
 pub mod sum;
+pub mod test_vectors;
 
 pub use hash::{Blake2b224, Blake2b256, Blake2b512, KesHashAlgorithm};
 pub use single::{CompactSingleKes, CompactSingleSig, OptimizedKesSignature, SingleKes};

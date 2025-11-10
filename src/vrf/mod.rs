@@ -2,7 +2,7 @@
 //!
 //! This module provides VRF implementations following IETF specifications:
 //! - **Draft-03** (ECVRF-ED25519-SHA512-Elligator2) - 80-byte proofs, Cardano standard
-//! - **Draft-13** (ECVRF-ED25519-SHA512-TAI) - 128-byte proofs, batch-compatible (planned)
+//! - **Draft-13** (ECVRF-ED25519-SHA512-TAI) - 128-byte proofs, batch-compatible
 //!
 //! Both variants maintain byte-level compatibility with Cardano's libsodium VRF implementation.
 //!
@@ -22,7 +22,9 @@
 //! ```
 
 pub mod draft03;
+pub mod draft13;
 pub mod cardano_compat;
+pub mod test_vectors;
 
 // Re-export main types
 pub use draft03::{
@@ -34,6 +36,11 @@ pub use draft03::{
     OUTPUT_SIZE,
 };
 
+pub use draft13::{
+    VrfDraft13,
+    PROOF_SIZE as DRAFT13_PROOF_SIZE,
+};
+
 // Re-export Cardano compatibility functions for advanced usage
 pub use cardano_compat::{
     cardano_vrf_prove,
@@ -41,7 +48,3 @@ pub use cardano_compat::{
     cardano_clear_cofactor,
     cardano_hash_to_curve,
 };
-
-// Draft-13 will be added here when migrated
-// pub mod draft13;
-// pub use draft13::VrfDraft13;
