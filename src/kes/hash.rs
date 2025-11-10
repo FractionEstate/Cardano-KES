@@ -26,6 +26,15 @@ pub trait KesHashAlgorithm: Clone + Send + Sync + 'static {
     /// Hash arbitrary data and return a fixed-size output
     fn hash(data: &[u8]) -> Vec<u8>;
 
+    /// Example: hash some data with the KES hash algorithm
+    ///
+    /// ```rust
+    /// use cardano_crypto::kes::hash::Blake2b256;
+    /// let data = b"kes test";
+    /// let h = Blake2b256::hash(data);
+    /// assert_eq!(h.len(), Blake2b256::OUTPUT_SIZE);
+    /// ```
+
     /// Hash two pieces of data concatenated together
     ///
     /// Default implementation concatenates then hashes, but can be overridden for efficiency.

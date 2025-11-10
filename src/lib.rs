@@ -58,6 +58,15 @@
 //! let signature = Ed25519::sign(&signing_key, b"message");
 //! ```
 
+//! ## Crate metadata
+//!
+//! ```rust
+//! use cardano_crypto::{NAME, VERSION};
+//! assert_eq!(NAME, "cardano-crypto");
+//! // VERSION comes from Cargo.toml at build time and should be present
+//! assert!(VERSION.len() > 0);
+//! ```
+
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(missing_docs)]

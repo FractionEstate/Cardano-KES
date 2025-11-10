@@ -1,4 +1,15 @@
 //! Common error types for all cryptographic operations
+//!
+//! # Examples
+//!
+//! ```rust
+//! use cardano_crypto::common::error::CryptoError;
+//!
+//! // Construct and format an error
+//! let err = CryptoError::InvalidInput;
+//! let s = format!("{}", err);
+//! assert!(s.len() > 0);
+//! ```
 
 #[cfg(not(feature = "thiserror"))]
 use core::fmt;

@@ -9,6 +9,20 @@
 //! - [`traits`] - Common traits (SignableRepresentation, ConstantTimeEq)
 //! - [`security`] - Security utilities (zeroize, etc.)
 //! - [`vrf_constants`] - VRF suite identifiers and domain separation constants
+//!
+//! # Examples
+//!
+//! ```rust
+//! use cardano_crypto::common::{hash_sha512, zeroize};
+//!
+//! let data = b"example";
+//! let hash = hash_sha512(data);
+//! assert_eq!(hash.len(), 64);
+//!
+//! let mut secret = [0x55u8; 8];
+//! zeroize(&mut secret);
+//! assert_eq!(secret, [0u8; 8]);
+//! ```
 
 pub mod error;
 
