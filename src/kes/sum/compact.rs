@@ -5,7 +5,7 @@
 
 use std::marker::PhantomData;
 
-use crate::common::error::{Error, Result};
+use crate::common::error::{CryptoError, Result};
 use crate::kes::hash::KesHashAlgorithm;
 use crate::kes::single::compact::{CompactKesComponents, CompactSingleKes, OptimizedKesSignature};
 use crate::kes::{KesAlgorithm, Period};
@@ -350,9 +350,9 @@ where
     H: KesHashAlgorithm,
 {
     fn active_verification_key_from_signature(
-        signature: &Self::Signature,
+        signature: &<Self as KesAlgorithm>::Signature,
         period: Period,
-    ) -> Self::VerificationKey {
+    ) -> <Self as KesAlgorithm>::VerificationKey {
         let t_half = D::total_periods();
         let active_is_left = period < t_half;
         let child_period = if active_is_left {

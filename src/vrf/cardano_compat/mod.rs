@@ -21,6 +21,6 @@ pub mod prove;
 pub mod verify;
 
 // Re-export main API
-pub use point::cardano_clear_cofactor;
+pub use point::{cardano_clear_cofactor, cardano_hash_to_curve, cardano_hash_to_curve_draft13};
 pub use prove::cardano_vrf_prove;
 pub use verify::cardano_vrf_verify;

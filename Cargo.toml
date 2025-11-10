@@ -16,7 +16,7 @@ readme = "README.md"
 default = ["std", "thiserror", "vrf", "kes", "dsign", "hash"]
 
 # Standard library support
-std = ["alloc", "curve25519-dalek/std", "sha2/std", "zeroize/std", "serde?/std"]
+std = ["alloc", "sha2/std", "zeroize/std", "serde?/std"]
 alloc = ["curve25519-dalek/alloc", "zeroize/alloc"]
 
 # Component features - allows users to enable only what they need

@@ -5,7 +5,8 @@
 //! - [`Ed25519`] - Standard Ed25519 signatures (used in Cardano transactions)
 //! - Additional signature schemes for cross-chain compatibility
 
-mod ed25519;
+/// Digital signature module providing Ed25519 implementation
+pub mod ed25519;
 
 pub use ed25519::Ed25519;
 
@@ -43,7 +44,7 @@ pub trait DsignAlgorithm: Clone + Send + Sync + 'static {
         verification_key: &Self::VerificationKey,
         message: &[u8],
         signature: &Self::Signature,
-    ) -> Result<(), crate::common::CryptoError>;
+    ) -> crate::common::Result<()>;
 
     /// Generate a key from a seed
     fn gen_key(seed: &[u8]) -> Self::SigningKey;

@@ -6,7 +6,7 @@
 //! - Blake2b-512 (64 bytes) - General purpose
 
 use super::HashAlgorithm;
-use blake2::digest::consts::{U28, U32, U64};
+use blake2::digest::consts::{U28, U32};
 use blake2::{Blake2b, Digest};
 
 /// Blake2b-224 hash algorithm (28-byte output)

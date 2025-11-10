@@ -12,7 +12,7 @@
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
-use crate::common::error::{CryptoError, Result};
+use crate::common::error::Result;
 
 pub mod hash;
 pub mod single;

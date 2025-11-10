@@ -22,7 +22,7 @@ pub struct Ed25519VerificationKey([u8; VERIFICATION_KEY_SIZE]);
 
 impl core::fmt::Debug for Ed25519VerificationKey {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "Ed25519VerificationKey({})", hex::encode(&self.0))
+        write!(f, "Ed25519VerificationKey(<{} bytes>)", self.0.len())
     }
 }
 
@@ -113,7 +113,7 @@ pub struct Ed25519Signature([u8; SIGNATURE_SIZE]);
 
 impl core::fmt::Debug for Ed25519Signature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "Ed25519Signature({})", hex::encode(&self.0))
+        write!(f, "Ed25519Signature(<{} bytes>)", self.0.len())
     }
 }
 
@@ -163,7 +163,7 @@ impl super::DsignAlgorithm for Ed25519 {
         verification_key: &Self::VerificationKey,
         message: &[u8],
         signature: &Self::Signature,
-    ) -> Result<(), CryptoError> {
+    ) -> Result<()> {
         let verifying_key = DalekVerifyingKey::from_bytes(verification_key.as_bytes())
             .map_err(|_| CryptoError::InvalidPublicKey)?;
 

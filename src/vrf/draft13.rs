@@ -70,7 +70,7 @@
 //! - Proof verification: ~900μs
 //! - Batch verification (4 proofs): ~2.5ms (vs 3.6ms individual)
 
-use curve25519_dalek::{constants::ED25519_BASEPOINT_POINT, scalar::Scalar, EdwardsPoint};
+use curve25519_dalek::{constants::ED25519_BASEPOINT_POINT, scalar::Scalar};
 use sha2::{Digest, Sha512};
 use zeroize::Zeroizing;
 

@@ -1,9 +1,10 @@
 //! Common error types for all cryptographic operations
 
-use core::fmt;
+/// Alias for backward compatibility
+pub type Result<T> = core::result::Result<T, CryptoError>;
 
 /// Result type for cryptographic operations
-pub type CryptoResult<T> = Result<T, CryptoError>;
+pub type CryptoResult<T> = core::result::Result<T, CryptoError>;
 
 /// Common cryptographic error types
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
