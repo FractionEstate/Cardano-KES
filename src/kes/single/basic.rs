@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn single_kes_serialization_roundtrip() {
         let seed = vec![3u8; <SingleKes<Ed25519>>::SEED_SIZE];
-        let sk = <SingleKes<Ed25519>>::gen_key_kes_from_seed(&seed).unwrap();
+        let sk = <SingleKes<Ed25519>>::gen_key_kes_from_seed_bytes(&seed).unwrap();
         let vk = <SingleKes<Ed25519>>::derive_verification_key(&sk).unwrap();
         let msg = b"serialization-test";
         let sig = <SingleKes<Ed25519>>::sign_kes(&(), 0, msg, &sk).unwrap();

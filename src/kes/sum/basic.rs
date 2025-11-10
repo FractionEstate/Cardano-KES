@@ -84,7 +84,6 @@ impl<D, H> KesAlgorithm for SumKes<D, H>
 where
     D: KesAlgorithm,
     D::VerificationKey: Clone,
-    D::Signature: Clone,
     H: KesHashAlgorithm,
 {
     type VerificationKey = Vec<u8>; // Hash of (vk0, vk1)

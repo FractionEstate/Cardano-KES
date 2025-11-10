@@ -179,10 +179,10 @@ mod tests {
         for input in cases {
             let blake512 = Blake2b512::hash(input);
             let blake224 = Blake2b224::hash(input);
-            assert_ne!(&blake512[..28], blake224.as_ref());
+            assert_ne!(&blake512[..28], &blake224[..]);
 
             let blake256 = Blake2b256::hash(input);
-            assert_ne!(&blake256[..28], blake224.as_ref());
+            assert_ne!(&blake256[..28], &blake224[..]);
         }
     }
 }

@@ -195,8 +195,8 @@ mod tests {
     #[test]
     fn test_kes_size_constants() {
         type TestSingleKes = SingleKes<Ed25519>;
-        type TestSum2Kes = Sum2Kes<Blake2b256, Ed25519>;
-        type TestSum6Kes = Sum6Kes<Blake2b256, Ed25519>;
+        type TestSum2Kes = Sum2Kes;
+        type TestSum6Kes = Sum6Kes;
 
         // SingleKES
         assert_eq!(TestSingleKes::SEED_SIZE, 32);

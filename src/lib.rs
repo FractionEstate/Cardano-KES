@@ -128,6 +128,12 @@ pub use kes::{
     Sum2Kes, Sum3Kes, Sum4Kes, Sum5Kes, Sum6Kes, Sum7Kes,
 };
 
+#[cfg(feature = "cbor")]
+pub use cbor::{
+    decode_bytes, decode_signature, decode_verification_key, encode_bytes, encode_signature,
+    encode_verification_key, CborError,
+};
+
 // ============================================================================
 // Crate metadata
 // ============================================================================

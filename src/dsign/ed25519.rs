@@ -263,6 +263,7 @@ impl CommonDsignAlgorithm for Ed25519 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::dsign::DsignAlgorithm;
 
     #[test]
     fn test_key_generation_deterministic() {
@@ -276,12 +277,12 @@ mod tests {
     fn test_sign_and_verify_roundtrip() {
         let seed = [42u8; 32];
         let signing_key = Ed25519::gen_key(&seed);
-        let verification_key = Ed25519::derive_verification_key(&signing_key);
+        let verification_key = <Ed25519 as crate::dsign::DsignAlgorithm>::derive_verification_key(&signing_key);
 
         let message = b"cardano";
-        let signature = Ed25519::sign(&signing_key, message);
+        let signature = <Ed25519 as crate::dsign::DsignAlgorithm>::sign(&signing_key, message);
 
-        let result = Ed25519::verify(&verification_key, message, &signature);
+        let result = <Ed25519 as crate::dsign::DsignAlgorithm>::verify(&verification_key, message, &signature);
         assert!(result.is_ok());
     }
 
@@ -289,10 +290,10 @@ mod tests {
     fn test_verify_fails_wrong_message() {
         let seed = [9u8; 32];
         let signing_key = Ed25519::gen_key(&seed);
-        let verification_key = Ed25519::derive_verification_key(&signing_key);
+        let verification_key = <Ed25519 as crate::dsign::DsignAlgorithm>::derive_verification_key(&signing_key);
 
-        let signature = Ed25519::sign(&signing_key, b"hello");
-        let result = Ed25519::verify(&verification_key, b"world", &signature);
+        let signature = <Ed25519 as crate::dsign::DsignAlgorithm>::sign(&signing_key, b"hello");
+        let result = <Ed25519 as crate::dsign::DsignAlgorithm>::verify(&verification_key, b"world", &signature);
 
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), CryptoError::VerificationFailed);
@@ -305,12 +306,12 @@ mod tests {
 
         let signing_key1 = Ed25519::gen_key(&seed1);
         let signing_key2 = Ed25519::gen_key(&seed2);
-        let verification_key2 = Ed25519::derive_verification_key(&signing_key2);
+        let verification_key2 = <Ed25519 as crate::dsign::DsignAlgorithm>::derive_verification_key(&signing_key2);
 
         let message = b"test";
-        let signature1 = Ed25519::sign(&signing_key1, message);
+        let signature1 = <Ed25519 as crate::dsign::DsignAlgorithm>::sign(&signing_key1, message);
 
-        let result = Ed25519::verify(&verification_key2, message, &signature1);
+        let result = <Ed25519 as crate::dsign::DsignAlgorithm>::verify(&verification_key2, message, &signature1);
         assert!(result.is_err());
     }
 
@@ -318,10 +319,10 @@ mod tests {
     fn test_empty_message() {
         let seed = [42u8; 32];
         let signing_key = Ed25519::gen_key(&seed);
-        let verification_key = Ed25519::derive_verification_key(&signing_key);
+        let verification_key = <Ed25519 as crate::dsign::DsignAlgorithm>::derive_verification_key(&signing_key);
 
-        let signature = Ed25519::sign(&signing_key, b"");
-        let result = Ed25519::verify(&verification_key, b"", &signature);
+        let signature = <Ed25519 as crate::dsign::DsignAlgorithm>::sign(&signing_key, b"");
+        let result = <Ed25519 as crate::dsign::DsignAlgorithm>::verify(&verification_key, b"", &signature);
         assert!(result.is_ok());
     }
 
@@ -329,11 +330,11 @@ mod tests {
     fn test_large_message() {
         let seed = [99u8; 32];
         let signing_key = Ed25519::gen_key(&seed);
-        let verification_key = Ed25519::derive_verification_key(&signing_key);
+        let verification_key = <Ed25519 as crate::dsign::DsignAlgorithm>::derive_verification_key(&signing_key);
 
         let large_message = vec![0xAB; 10_000];
-        let signature = Ed25519::sign(&signing_key, &large_message);
-        let result = Ed25519::verify(&verification_key, &large_message, &signature);
+        let signature = <Ed25519 as crate::dsign::DsignAlgorithm>::sign(&signing_key, &large_message);
+        let result = <Ed25519 as crate::dsign::DsignAlgorithm>::verify(&verification_key, &large_message, &signature);
         assert!(result.is_ok());
     }
 }

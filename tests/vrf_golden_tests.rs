@@ -3,7 +3,7 @@
 //! These tests validate byte-for-byte compatibility with Cardano's official VRF
 //! implementation by testing against official test vectors from the cardano-base repository.
 
-use cardano_kes::vrf::{draft03, draft13};
+use cardano_crypto::vrf::{draft03, draft13};
 use std::fs;
 use std::path::PathBuf;
 

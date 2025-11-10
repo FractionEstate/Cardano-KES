@@ -3,9 +3,9 @@
 //! These tests validate the correct behavior of KES key evolution and signatures
 //! across multiple periods, ensuring compatibility with Cardano's KES implementation.
 
-use cardano_kes::kes::single::{SingleKesSignature, SingleKesVerifyKey};
-use cardano_kes::kes::sum::{Sum6Kes, Sum6KesSignature, Sum6KesVerifyKey};
-use cardano_kes::common::traits::{KesSig, KesVk, KesSigningKey};
+use cardano_crypto::kes::single::{SingleKesSignature, SingleKesVerifyKey};
+use cardano_crypto::kes::sum::{Sum6Kes, Sum6KesSignature, Sum6KesVerifyKey};
+use cardano_crypto::common::traits::{KesSig, KesVk, KesSigningKey};
 
 /// Test SingleKES basic operations
 #[test]
@@ -14,7 +14,7 @@ fn test_single_kes_basic() {
     seed[0] = 0x42; // Deterministic test seed
 
     // Generate key at period 0
-    let mut sk = cardano_kes::kes::single::BasicSingleKes::keygen(&seed, 0);
+    let mut sk = cardano_crypto::kes::single::BasicSingleKes::keygen(&seed, 0);
     let vk = sk.to_verifying_key();
 
     let message = b"SingleKES test message";
@@ -42,7 +42,7 @@ fn test_single_kes_compact() {
     let mut seed = [0u8; 32];
     seed[0] = 0x43;
 
-    let mut sk = cardano_kes::kes::single::CompactSingleKes::keygen(&seed, 0);
+    let mut sk = cardano_crypto::kes::single::CompactSingleKes::keygen(&seed, 0);
     let vk = sk.to_verifying_key();
 
     let message = b"CompactSingleKES test message";
@@ -61,7 +61,7 @@ fn test_sum2_kes() {
     let mut seed = [0u8; 32];
     seed[0] = 0x44;
 
-    let mut sk = cardano_kes::kes::sum::Sum2Kes::keygen(&seed, 0);
+    let mut sk = cardano_crypto::kes::sum::Sum2Kes::keygen(&seed, 0);
     let vk = sk.to_verifying_key();
 
     let msg0 = b"Period 0 message";
@@ -125,7 +125,7 @@ fn test_kes_expiration() {
     let seed = [0x46u8; 32];
 
     // Sum2KES has 2 periods (0 and 1)
-    let mut sk = cardano_kes::kes::sum::Sum2Kes::keygen(&seed, 0);
+    let mut sk = cardano_crypto::kes::sum::Sum2Kes::keygen(&seed, 0);
 
     // Update beyond the max period
     sk.update(); // Period 1
@@ -191,13 +191,13 @@ fn test_different_sum_types() {
     let seed = [0x4Au8; 32];
 
     // Sum0 (1 period)
-    let sk0 = cardano_kes::kes::sum::Sum0Kes::keygen(&seed, 0);
+    let sk0 = cardano_crypto::kes::sum::Sum0Kes::keygen(&seed, 0);
     let vk0 = sk0.to_verifying_key();
     let sig0 = sk0.sign(0, b"msg");
     assert!(vk0.verify(0, b"msg", &sig0), "Sum0 verification failed");
 
     // Sum1 (2 periods)
-    let mut sk1 = cardano_kes::kes::sum::Sum1Kes::keygen(&seed, 0);
+    let mut sk1 = cardano_crypto::kes::sum::Sum1Kes::keygen(&seed, 0);
     let vk1 = sk1.to_verifying_key();
     let sig1a = sk1.sign(0, b"msg");
     sk1.update();
@@ -205,7 +205,7 @@ fn test_different_sum_types() {
     assert!(vk1.verify(0, b"msg", &sig1a) && vk1.verify(1, b"msg", &sig1b), "Sum1 verification failed");
 
     // Sum2 (4 periods)
-    let mut sk2 = cardano_kes::kes::sum::Sum2Kes::keygen(&seed, 0);
+    let mut sk2 = cardano_crypto::kes::sum::Sum2Kes::keygen(&seed, 0);
     let vk2 = sk2.to_verifying_key();
     for i in 0..4 {
         let sig = sk2.sign(i, b"msg");
@@ -241,7 +241,7 @@ fn test_kes_binary_sizes() {
     let seed = [0x4Cu8; 32];
 
     // SingleKES
-    let single_sk = cardano_kes::kes::single::BasicSingleKes::keygen(&seed, 0);
+    let single_sk = cardano_crypto::kes::single::BasicSingleKes::keygen(&seed, 0);
     let single_vk = single_sk.to_verifying_key();
     let single_sig = single_sk.sign(0, b"test");
 
