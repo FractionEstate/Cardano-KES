@@ -41,7 +41,7 @@ fn demo_single_kes() -> Result<()> {
 
     // Generate keypair
     let seed = [1u8; 32];
-    let sk = MyKes::gen_key_kes_from_seed_bytes_bytes(&seed)?;
+    let sk = MyKes::gen_key_kes_from_seed_bytes(&seed)?;
     let vk = MyKes::derive_verification_key(&sk)?;
     println!("\n✓ Generated keypair from seed");
 
@@ -117,15 +117,15 @@ fn demo_sum2_kes() -> Result<()> {
 
         // Update key for next period
         if period < MyKes::total_periods() - 1 {
-            let updated = MyKes::update_kes(&(), sk, period)?;
-            match updated {
+            let updated_sk = MyKes::update_kes(&(), sk, period)?;
+            match updated_sk {
                 Some(new_sk) => {
                     sk = new_sk;
                     println!("  ✓ Key updated to period {}", period + 1);
                 }
                 None => {
                     println!("  ✗ ERROR: Key expired unexpectedly");
-                    break;
+                    return Ok(());
                 }
             }
         }
@@ -167,37 +167,27 @@ fn demo_sum6_kes() -> Result<()> {
     let test_periods = [0, 1, 15, 31, 32, 50, 63];
     println!("\nDemonstrating key evolution across selected periods:");
 
-    for &period in &test_periods {
-        let period_u64 = period as u64;
-        // Update to target period
-        while sk
-            .as_ref()
-            .map(|_| period_u64)
-            .unwrap_or(0)
-            < period_u64.saturating_sub(1)
-        {
-            if let Some(current_sk) = sk {
-                let current_period = period_u64.saturating_sub(1);
-                sk = MyKes::update_kes(&(), current_sk, current_period)?;
-            } else {
-                break;
+    let mut current_period = 0u64;
+    for &target_period in &test_periods {
+        // Update key to target period
+        while current_period < target_period {
+            match MyKes::update_kes(&(), sk, current_period)? {
+                Some(new_sk) => {
+                    sk = new_sk;
+                    current_period += 1;
+                }
+                None => {
+                    println!("  Period {:2}: ✗ Key expired", target_period);
+                    return Ok(());
+                }
             }
         }
 
-        if let Some(ref signing_key) = sk {
-            let message = format!("Cardano block at slot {}", period * 100);
-            let sig = MyKes::sign_kes(&(), period, message.as_bytes(), signing_key)?;
-            MyKes::verify_kes(&(), &vk, period, message.as_bytes(), &sig)?;
-            println!("  Period {:2}: ✓ Sign & verify successful", period);
-
-            // Update for next iteration
-            if period < 63 {
-                sk = MyKes::update_kes(&(), sk.unwrap(), period)?;
-            }
-        } else {
-            println!("  Period {:2}: ✗ Key expired", period);
-            break;
-        }
+        // Sign at target period
+        let message = format!("Cardano block at slot {}", target_period * 100);
+        let sig = MyKes::sign_kes(&(), target_period, message.as_bytes(), &sk)?;
+        MyKes::verify_kes(&(), &vk, target_period, message.as_bytes(), &sig)?;
+        println!("  Period {:2}: ✓ Sign & verify successful", target_period);
     }
 
     // Demonstrate expiration
