@@ -289,7 +289,7 @@ impl VrfDraft13 {
         c_hasher.update([SUITE_DRAFT13]);
         c_hasher.update([TWO]);
         c_hasher.update(public_key);
-        c_hasher.update(&h_string);
+        c_hasher.update(h_string);
         c_hasher.update(gamma_bytes);
         c_hasher.update(k_b_bytes);
         c_hasher.update(k_h_bytes);

@@ -12,8 +12,7 @@
 use cardano_crypto::common::error::Result;
 use cardano_crypto::dsign::Ed25519;
 use cardano_crypto::kes::{
-    Blake2b256, CompactSingleKes, CompactSum2Kes, CompactSum6Kes, KesAlgorithm, SingleKes,
-    Sum2Kes, Sum6Kes,
+    CompactSum6Kes, KesAlgorithm, SingleKes, Sum2Kes, Sum6Kes,
 };
 
 /// Helper to print separator lines
@@ -201,7 +200,7 @@ fn demo_sum6_kes() -> Result<()> {
     }
 
     let message = b"Final block";
-    let sig = MyKes::sign_kes(&(), 63, message, &sk_fresh)?;
+    let _sig = MyKes::sign_kes(&(), 63, message, &sk_fresh)?;
     println!("✓ Successfully signed at period 63 (last valid period)");
 
     // Try to update past expiration

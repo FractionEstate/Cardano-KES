@@ -139,7 +139,7 @@ mod tests {
 
         // Derive secret scalar and public key (Ed25519 key derivation)
         let mut hasher = Sha512::new();
-        hasher.update(&seed);
+        hasher.update(seed);
         let hash = hasher.finalize();
 
         let mut secret_scalar_bytes = [0u8; 32];
