@@ -8,6 +8,32 @@
 //! - SingleKES - Single-period signature (base case)
 //! - Sum0Kes through Sum7Kes - Binary tree composition (2^0 to 2^7 periods)
 //! - CompactSum variants - Optimized signatures with smaller size
+//!
+//! # Examples
+//!
+//! ```
+//! use cardano_crypto::kes::{Sum6Kes, KesAlgorithm};
+//!
+//! // Generate a key for 64 periods (2^6)
+//! let seed = [0u8; 32];
+//! let mut signing_key = Sum6Kes::gen_key_kes_from_seed_bytes(&seed).unwrap();
+//! let verification_key = Sum6Kes::derive_verification_key(&signing_key).unwrap();
+//!
+//! // Sign at period 0
+//! let message = b"Block data for period 0";
+//! let signature = Sum6Kes::sign_kes(&(), 0, message, &signing_key).unwrap();
+//!
+//! // Verify signature
+//! assert!(Sum6Kes::verify_kes(&(), &verification_key, 0, message, &signature).is_ok());
+//!
+//! // Evolve key to period 1
+//! signing_key = Sum6Kes::update_kes(&(), signing_key, 0).unwrap().unwrap();
+//!
+//! // Sign at period 1
+//! let message1 = b"Block data for period 1";
+//! let signature1 = Sum6Kes::sign_kes(&(), 1, message1, &signing_key).unwrap();
+//! assert!(Sum6Kes::verify_kes(&(), &verification_key, 1, message1, &signature1).is_ok());
+//! ```
 
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;

@@ -10,6 +10,23 @@
 //! - Seeds must be kept secret - they can regenerate all derived keys
 //! - Use `zeroize` to clear seeds from memory after use
 //! - Never reuse seeds across different applications or protocols
+//!
+//! # Examples
+//!
+//! ```
+//! use cardano_crypto::seed::{derive_seed, expand_seed};
+//!
+//! // Derive a seed from mnemonic or passphrase
+//! let mnemonic = b"example mnemonic phrase with high entropy";
+//! let master_seed = derive_seed(mnemonic);
+//!
+//! // Derive child seeds for hierarchical key derivation
+//! let child_seed_0 = expand_seed(&master_seed, 0);
+//! let child_seed_1 = expand_seed(&master_seed, 1);
+//!
+//! // Each child seed can be used for different purposes
+//! assert_ne!(child_seed_0, child_seed_1);
+//! ```
 
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;

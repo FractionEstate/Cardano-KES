@@ -4,6 +4,24 @@
 //!
 //! - [`Ed25519`] - Standard Ed25519 signatures (used in Cardano transactions)
 //! - Additional signature schemes for cross-chain compatibility
+//!
+//! # Examples
+//!
+//! ```
+//! use cardano_crypto::dsign::{Ed25519, DsignAlgorithm};
+//!
+//! // Generate a key pair
+//! let seed = [42u8; 32];
+//! let signing_key = Ed25519::gen_key(&seed);
+//! let verification_key = Ed25519::derive_verification_key(&signing_key);
+//!
+//! // Sign a message
+//! let message = b"Cardano transaction data";
+//! let signature = Ed25519::sign(&signing_key, message);
+//!
+//! // Verify the signature
+//! assert!(Ed25519::verify(&verification_key, message, &signature).is_ok());
+//! ```
 
 /// Digital signature module providing Ed25519 implementation
 pub mod ed25519;

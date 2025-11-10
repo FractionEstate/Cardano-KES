@@ -10,15 +10,33 @@
 //!
 //! ## VRF Draft-03 (Cardano Standard)
 //!
-//! ```rust,ignore
+//! ```
 //! use cardano_crypto::vrf::VrfDraft03;
 //!
+//! // Generate keypair
 //! let seed = [42u8; 32];
 //! let (secret_key, public_key) = VrfDraft03::keypair_from_seed(&seed);
 //!
+//! // Prove
 //! let message = b"Cardano block slot 12345";
-//! let proof = VrfDraft03::prove(&secret_key, message)?;
-//! let output = VrfDraft03::verify(&public_key, &proof, message)?;
+//! let proof = VrfDraft03::prove(&secret_key, message).unwrap();
+//!
+//! // Verify and get output
+//! let output = VrfDraft03::verify(&public_key, &proof, message).unwrap();
+//! assert_eq!(output.len(), 64);
+//! ```
+//!
+//! ## VRF Draft-13
+//!
+//! ```
+//! use cardano_crypto::vrf::VrfDraft13;
+//!
+//! let seed = [42u8; 32];
+//! let (secret_key, public_key) = VrfDraft13::keypair_from_seed(&seed);
+//!
+//! let message = b"Random seed input";
+//! let proof = VrfDraft13::prove(&secret_key, message).unwrap();
+//! let output = VrfDraft13::verify(&public_key, &proof, message).unwrap();
 //! ```
 
 pub mod cardano_compat;

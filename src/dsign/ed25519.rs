@@ -79,6 +79,20 @@ const SECRET_COMPOUND_SIZE: usize = 64;
 /// - Derive Cardano addresses
 /// - Identify stake pools and payment credentials
 ///
+/// # Examples
+///
+/// ```
+/// use cardano_crypto::dsign::ed25519::Ed25519VerificationKey;
+///
+/// // Parse from bytes
+/// let bytes = [0u8; 32];
+/// if let Some(vk) = Ed25519VerificationKey::from_bytes(&bytes) {
+///     // Use verification key
+///     let key_bytes = vk.as_bytes();
+///     assert_eq!(key_bytes.len(), 32);
+/// }
+/// ```
+///
 /// # Security
 ///
 /// - Cannot be used to forge signatures (one-way derivation from signing key)

@@ -6,6 +6,21 @@
 //! - [`Blake2b256`] - 32-byte Blake2b hash (used in KES verification keys)
 //! - [`Blake2b512`] - 64-byte Blake2b hash (general purpose)
 //! - Additional cross-chain hashes (SHA-256, SHA-512, etc.) for compatibility
+//!
+//! # Examples
+//!
+//! ```
+//! use cardano_crypto::hash::{Blake2b256, HashAlgorithm};
+//!
+//! // Hash some data
+//! let data = b"Cardano blockchain data";
+//! let hash = Blake2b256::hash(data);
+//! assert_eq!(hash.len(), 32);
+//!
+//! // Hash concatenated data
+//! let hash = Blake2b256::hash_concat(b"part1", b"part2");
+//! assert_eq!(hash.len(), 32);
+//! ```
 
 use alloc::vec::Vec;
 
