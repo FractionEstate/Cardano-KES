@@ -41,7 +41,7 @@ fn demo_single_kes() -> Result<()> {
 
     // Generate keypair
     let seed = [1u8; 32];
-    let sk = MyKes::gen_key_kes_from_seed_bytes(&seed)?;
+    let sk = MyKes::gen_key_kes_from_seed_bytes_bytes(&seed)?;
     let vk = MyKes::derive_verification_key(&sk)?;
     println!("\n✓ Generated keypair from seed");
 
@@ -85,7 +85,7 @@ fn demo_sum2_kes() -> Result<()> {
 
     // Generate keypair
     let seed = [2u8; 32];
-    let mut sk = MyKes::gen_key_kes_from_seed(&seed)?;
+    let mut sk = MyKes::gen_key_kes_from_seed_bytes(&seed)?;
     let vk = MyKes::derive_verification_key(&sk)?;
     println!("\n✓ Generated keypair from seed");
 
@@ -159,7 +159,7 @@ fn demo_sum6_kes() -> Result<()> {
 
     // Generate keypair
     let seed = [6u8; 32];
-    let mut sk = MyKes::gen_key_kes_from_seed(&seed)?;
+    let mut sk = MyKes::gen_key_kes_from_seed_bytes(&seed)?;
     let vk = MyKes::derive_verification_key(&sk)?;
     println!("\n✓ Generated keypair from seed");
 
@@ -203,7 +203,7 @@ fn demo_sum6_kes() -> Result<()> {
     // Demonstrate expiration
     println!("\nDemonstrating key expiration:");
     let seed_fresh = [7u8; 32];
-    let mut sk_fresh = MyKes::gen_key_kes_from_seed(&seed_fresh)?;
+    let mut sk_fresh = MyKes::gen_key_kes_from_seed_bytes(&seed_fresh)?;
 
     // Fast-forward to period 63 (last period)
     for p in 0..63 {
@@ -249,7 +249,7 @@ fn demo_compact_sum6_kes() -> Result<()> {
 
     // Generate and use compact KES
     let seed = [8u8; 32];
-    let sk = MyKes::gen_key_kes_from_seed(&seed)?;
+    let sk = MyKes::gen_key_kes_from_seed_bytes(&seed)?;
     let vk = MyKes::derive_verification_key(&sk)?;
     println!("\n✓ Generated compact KES keypair");
 

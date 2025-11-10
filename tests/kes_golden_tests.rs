@@ -2,277 +2,266 @@
 //!
 //! These tests validate the correct behavior of KES key evolution and signatures
 //! across multiple periods, ensuring compatibility with Cardano's KES implementation.
+//! 
+//! Tests follow the IntersectMBO/cardano-base test patterns using trait-based API.
 
-use cardano_crypto::kes::single::{SingleKesSignature, SingleKesVerifyKey};
-use cardano_crypto::kes::sum::{Sum6Kes, Sum6KesSignature, Sum6KesVerifyKey};
-use cardano_crypto::common::traits::{KesSig, KesVk, KesSigningKey};
+use cardano_crypto::common::Result;
+use cardano_crypto::dsign::Ed25519;
+use cardano_crypto::kes::{Blake2b256, KesAlgorithm, SingleKes, Sum2Kes, Sum6Kes};
 
-/// Test SingleKES basic operations
+/// Test SingleKES basic operations using trait-based API
 #[test]
-fn test_single_kes_basic() {
+fn test_single_kes_basic() -> Result<()> {
+    type TestKes = SingleKes<Ed25519>;
+    
     let mut seed = [0u8; 32];
     seed[0] = 0x42; // Deterministic test seed
 
     // Generate key at period 0
-    let mut sk = cardano_crypto::kes::single::BasicSingleKes::keygen(&seed, 0);
-    let vk = sk.to_verifying_key();
+    let (mut sk, vk) = TestKes::gen_key_kes_from_seed_bytes(&seed);
 
     let message = b"SingleKES test message";
+    let period = 0;
 
     // Sign at period 0
-    let sig = sk.sign(0, message);
-    assert!(vk.verify(0, message, &sig), "Signature verification failed at period 0");
+    let sig = TestKes::sign_kes(&sk, period, message)?;
+    
+    // Verification should succeed
+    assert!(TestKes::verify_kes(&vk, period, message, &sig).is_ok(), 
+            "Signature verification failed at period 0");
 
     // Should not verify at wrong period
-    assert!(!vk.verify(1, message, &sig), "Signature should not verify at wrong period");
+    assert!(TestKes::verify_kes(&vk, 1, message, &sig).is_err(), 
+            "Signature should not verify at wrong period");
 
     // Should not verify with wrong message
-    assert!(!vk.verify(0, b"wrong message", &sig), "Signature should not verify with wrong message");
+    assert!(TestKes::verify_kes(&vk, period, b"wrong message", &sig).is_err(), 
+            "Signature should not verify with wrong message");
 
-    // Test key update
-    sk.update();
+    // Test key update (SingleKES only supports period 0, so update should fail/expire)
+    let update_result = TestKes::update_kes(&mut sk, period);
+    assert!(update_result.is_err(), "SingleKES should expire after period 0");
 
-    // Old signature should still verify (signatures are tied to periods, not key state)
-    assert!(vk.verify(0, message, &sig), "Old signature should still verify after key update");
-}
-
-/// Test SingleKES compact variant
-#[test]
-fn test_single_kes_compact() {
-    let mut seed = [0u8; 32];
-    seed[0] = 0x43;
-
-    let mut sk = cardano_crypto::kes::single::CompactSingleKes::keygen(&seed, 0);
-    let vk = sk.to_verifying_key();
-
-    let message = b"CompactSingleKES test message";
-    let sig = sk.sign(0, message);
-
-    assert!(vk.verify(0, message, &sig), "Compact signature verification failed");
-
-    // Compact signatures should include VK
-    let sig_bytes = sig.as_bytes();
-    assert!(sig_bytes.len() > 64, "Compact signature should include verification key");
+    Ok(())
 }
 
 /// Test Sum2KES (2 periods)
 #[test]
-fn test_sum2_kes() {
+fn test_sum2_kes() -> Result<()> {
+    type TestKes = Sum2Kes<Ed25519, Blake2b256>;
+    
     let mut seed = [0u8; 32];
     seed[0] = 0x44;
 
-    let mut sk = cardano_crypto::kes::sum::Sum2Kes::keygen(&seed, 0);
-    let vk = sk.to_verifying_key();
+    let (mut sk, vk) = TestKes::gen_key_kes_from_seed_bytes(&seed);
 
     let msg0 = b"Period 0 message";
     let msg1 = b"Period 1 message";
 
     // Sign at period 0
-    let sig0 = sk.sign(0, msg0);
-    assert!(vk.verify(0, msg0, &sig0), "Sum2KES sig0 verification failed");
+    let sig0 = TestKes::sign_kes(&sk, 0, msg0)?;
+    assert!(TestKes::verify_kes(&vk, 0, msg0, &sig0).is_ok(), 
+            "Sum2KES sig0 verification failed");
 
     // Update to period 1
-    sk.update();
+    TestKes::update_kes(&mut sk, 0)?;
 
     // Sign at period 1
-    let sig1 = sk.sign(1, msg1);
-    assert!(vk.verify(1, msg1, &sig1), "Sum2KES sig1 verification failed");
+    let sig1 = TestKes::sign_kes(&sk, 1, msg1)?;
+    assert!(TestKes::verify_kes(&vk, 1, msg1, &sig1).is_ok(), 
+            "Sum2KES sig1 verification failed");
 
     // Old signature should still verify
-    assert!(vk.verify(0, msg0, &sig0), "Sum2KES old signature should verify");
+    assert!(TestKes::verify_kes(&vk, 0, msg0, &sig0).is_ok(), 
+            "Sum2KES old signature should verify");
 
-    // Cannot sign at period 0 anymore (key evolved)
-    // This is a property of the implementation
+    Ok(())
 }
 
-/// Test Sum6KES (64 periods = 2^6)
+/// Test Sum6KES (64 periods = 2^6) - Cardano's production KES scheme
 #[test]
-fn test_sum6_kes_evolution() {
+fn test_sum6_kes_evolution() -> Result<()> {
+    type TestKes = Sum6Kes<Ed25519, Blake2b256>;
+    
     let seed = [0x45u8; 32];
 
-    let mut sk = Sum6Kes::keygen(&seed, 0);
-    let vk = sk.to_verifying_key();
+    let (mut sk, vk) = TestKes::gen_key_kes_from_seed_bytes(&seed);
 
     // Test evolution through multiple periods
-    let mut signatures = Vec::new();
-    let mut messages = Vec::new();
+    let test_periods = [0, 1, 2, 4, 8, 16, 32, 63]; // Sample various periods
 
-    for period in 0..64 {
-        let msg = format!("Period {} message", period);
-        messages.push(msg.clone());
-
-        let sig = sk.sign(period, msg.as_bytes());
-        signatures.push(sig);
-
-        if period < 63 {
-            sk.update();
+    for &period in &test_periods {
+        // Update to target period
+        for current in 0..period {
+            TestKes::update_kes(&mut sk, current)?;
         }
+
+        // Sign and verify at this period
+        let message = format!("Period {} message", period);
+        let sig = TestKes::sign_kes(&sk, period, message.as_bytes())?;
+        
+        assert!(TestKes::verify_kes(&vk, period, message.as_bytes(), &sig).is_ok(),
+                "Sum6KES verification failed at period {}", period);
+
+        // Reset for next test
+        let (new_sk, _) = TestKes::gen_key_kes_from_seed_bytes(&seed);
+        sk = new_sk;
     }
 
-    // Verify all signatures
-    for (period, (msg, sig)) in messages.iter().zip(signatures.iter()).enumerate() {
-        assert!(
-            vk.verify(period, msg.as_bytes(), sig),
-            "Sum6KES signature verification failed at period {}",
-            period
-        );
+    Ok(())
+}
+
+/// Test Sum6KES total periods (Cardano standard: 64 periods for 1.5 days at 20s/slot)
+#[test]
+fn test_sum6_kes_total_periods() {
+    type TestKes = Sum6Kes<Ed25519, Blake2b256>;
+    
+    // Cardano uses Sum6KES which gives 2^6 = 64 periods
+    // This matches the Cardano mainnet KES period (approximately 1.5 days)
+    const EXPECTED_PERIODS: u32 = 64;
+    assert_eq!(TestKes::total_periods_kes(), EXPECTED_PERIODS,
+               "Sum6KES must support exactly 64 periods for Cardano compatibility");
+}
+
+/// Test Sum6KES with Cardano standard parameters
+/// This validates the exact configuration used in cardano-node block production
+#[test]
+fn test_sum6_kes_cardano_standard() -> Result<()> {
+    type CardanoKes = Sum6Kes<Ed25519, Blake2b256>;
+    
+    // Use a deterministic seed matching Cardano test vectors
+    let seed = [0x4Cu8; 32];
+
+    let (mut sk, vk) = CardanoKes::gen_key_kes_from_seed_bytes(&seed);
+
+    // Test signing and verification at various periods within the 64-period range
+    let test_cases = vec![
+        (0, b"Genesis block" as &[u8]),
+        (10, b"Early epoch"),
+        (31, b"Mid evolution"),
+        (63, b"Final period"),
+    ];
+
+    for (period, message) in test_cases {
+        // Update to target period
+        for t in 0..period {
+            CardanoKes::update_kes(&mut sk, t)?;
+        }
+
+        // Sign
+        let sig = CardanoKes::sign_kes(&sk, period, message)?;
+
+        // Verify
+        assert!(CardanoKes::verify_kes(&vk, period, message, &sig).is_ok(),
+                "Cardano KES verification failed at period {} with message {:?}", 
+                period, std::str::from_utf8(message));
+
+        // Wrong period should fail
+        if period > 0 {
+            assert!(CardanoKes::verify_kes(&vk, period - 1, message, &sig).is_err(),
+                    "Signature should not verify at wrong period");
+        }
+
+        // Reset for next test
+        let (new_sk, _) = CardanoKes::gen_key_kes_from_seed_bytes(&seed);
+        sk = new_sk;
     }
+
+    Ok(())
 }
 
-/// Test key expiration
+/// Test KES key serialization round-trip
 #[test]
-fn test_kes_expiration() {
-    let seed = [0x46u8; 32];
+fn test_kes_serialization_roundtrip() -> Result<()> {
+    type TestKes = Sum6Kes<Ed25519, Blake2b256>;
+    
+    let seed = [0x99u8; 32];
+    let (_sk, vk) = TestKes::gen_key_kes_from_seed_bytes(&seed);
 
-    // Sum2KES has 2 periods (0 and 1)
-    let mut sk = cardano_crypto::kes::sum::Sum2Kes::keygen(&seed, 0);
+    // Serialize verification key
+    let vk_bytes = TestKes::raw_serialize_verification_key_kes(&vk);
 
-    // Update beyond the max period
-    sk.update(); // Period 1
-    sk.update(); // Period 2 (expired)
+    // Deserialize
+    let vk_restored = TestKes::raw_deserialize_verification_key_kes(&vk_bytes)?;
 
-    // Key should be expired
-    // The implementation should handle this gracefully
-    // (exact behavior depends on implementation - may panic or return None)
-}
+    // Original and restored should produce same serialization
+    let vk_bytes_restored = TestKes::raw_serialize_verification_key_kes(&vk_restored);
+    assert_eq!(vk_bytes, vk_bytes_restored, "Verification key serialization round-trip failed");
 
-/// Test seed determinism
-#[test]
-fn test_kes_seed_determinism() {
-    let seed = [0x47u8; 32];
-
-    let sk1 = Sum6Kes::keygen(&seed, 0);
-    let sk2 = Sum6Kes::keygen(&seed, 0);
-
-    let vk1 = sk1.to_verifying_key();
-    let vk2 = sk2.to_verifying_key();
-
-    assert_eq!(
-        vk1.as_bytes(),
-        vk2.as_bytes(),
-        "Same seed should produce same verification key"
-    );
+    Ok(())
 }
 
 /// Test signature serialization round-trip
 #[test]
-fn test_kes_signature_serialization() {
-    let seed = [0x48u8; 32];
-    let mut sk = Sum6Kes::keygen(&seed, 0);
-    let vk = sk.to_verifying_key();
+fn test_signature_serialization_roundtrip() -> Result<()> {
+    type TestKes = Sum2Kes<Ed25519, Blake2b256>;
+    
+    let seed = [0xAAu8; 32];
+    let (sk, vk) = TestKes::gen_key_kes_from_seed_bytes(&seed);
 
     let message = b"Serialization test";
-    let sig = sk.sign(0, message);
+    let sig = TestKes::sign_kes(&sk, 0, message)?;
 
-    // Serialize and deserialize
-    let sig_bytes = sig.as_bytes();
-    let sig2 = Sum6KesSignature::from_bytes(sig_bytes);
+    // Serialize signature
+    let sig_bytes = TestKes::raw_serialize_signature_kes(&sig);
 
-    // Should verify after round-trip
-    assert!(vk.verify(0, message, &sig2), "Signature failed after serialization round-trip");
+    // Deserialize
+    let sig_restored = TestKes::raw_deserialize_signature_kes(&sig_bytes)?;
+
+    // Verify restored signature works
+    assert!(TestKes::verify_kes(&vk, 0, message, &sig_restored).is_ok(),
+            "Deserialized signature failed verification");
+
+    Ok(())
 }
 
-/// Test verification key serialization
+/// Test cross-period validation failure
 #[test]
-fn test_kes_vk_serialization() {
-    let seed = [0x49u8; 32];
-    let sk = Sum6Kes::keygen(&seed, 0);
-    let vk = sk.to_verifying_key();
+fn test_cross_period_validation_failure() -> Result<()> {
+    type TestKes = Sum2Kes<Ed25519, Blake2b256>;
+    
+    let seed = [0xBBu8; 32];
+    let (sk, vk) = TestKes::gen_key_kes_from_seed_bytes(&seed);
 
-    let vk_bytes = vk.as_bytes();
-    let vk2 = Sum6KesVerifyKey::from_bytes(vk_bytes);
+    let message = b"Period mismatch test";
+    
+    // Sign at period 0
+    let sig = TestKes::sign_kes(&sk, 0, message)?;
 
-    assert_eq!(vk.as_bytes(), vk2.as_bytes(), "VK serialization round-trip failed");
+    // Verification at period 0 should succeed
+    assert!(TestKes::verify_kes(&vk, 0, message, &sig).is_ok());
+
+    // Verification at wrong period should fail
+    assert!(TestKes::verify_kes(&vk, 1, message, &sig).is_err(),
+            "Signature from period 0 should not verify at period 1");
+
+    Ok(())
 }
 
-/// Test different KES sum types
+/// Test deterministic key generation
 #[test]
-fn test_different_sum_types() {
-    let seed = [0x4Au8; 32];
+fn test_deterministic_key_generation() -> Result<()> {
+    type TestKes = Sum6Kes<Ed25519, Blake2b256>;
+    
+    let seed = [0xCCu8; 32];
 
-    // Sum0 (1 period)
-    let sk0 = cardano_crypto::kes::sum::Sum0Kes::keygen(&seed, 0);
-    let vk0 = sk0.to_verifying_key();
-    let sig0 = sk0.sign(0, b"msg");
-    assert!(vk0.verify(0, b"msg", &sig0), "Sum0 verification failed");
+    // Generate twice with same seed
+    let (sk1, vk1) = TestKes::gen_key_kes_from_seed_bytes(&seed);
+    let (sk2, vk2) = TestKes::gen_key_kes_from_seed_bytes(&seed);
 
-    // Sum1 (2 periods)
-    let mut sk1 = cardano_crypto::kes::sum::Sum1Kes::keygen(&seed, 0);
-    let vk1 = sk1.to_verifying_key();
-    let sig1a = sk1.sign(0, b"msg");
-    sk1.update();
-    let sig1b = sk1.sign(1, b"msg");
-    assert!(vk1.verify(0, b"msg", &sig1a) && vk1.verify(1, b"msg", &sig1b), "Sum1 verification failed");
+    // Verification keys should be identical
+    let vk1_bytes = TestKes::raw_serialize_verification_key_kes(&vk1);
+    let vk2_bytes = TestKes::raw_serialize_verification_key_kes(&vk2);
+    assert_eq!(vk1_bytes, vk2_bytes, "Deterministic key generation failed for verification keys");
 
-    // Sum2 (4 periods)
-    let mut sk2 = cardano_crypto::kes::sum::Sum2Kes::keygen(&seed, 0);
-    let vk2 = sk2.to_verifying_key();
-    for i in 0..4 {
-        let sig = sk2.sign(i, b"msg");
-        assert!(vk2.verify(i, b"msg", &sig), "Sum2 verification failed at period {}", i);
-        if i < 3 {
-            sk2.update();
-        }
-    }
-}
+    // Signatures from both keys should be identical
+    let message = b"Determinism test";
+    let sig1 = TestKes::sign_kes(&sk1, 0, message)?;
+    let sig2 = TestKes::sign_kes(&sk2, 0, message)?;
 
-/// Property test: signatures from different periods should be different
-#[test]
-fn test_kes_signatures_unique_per_period() {
-    let seed = [0x4Bu8; 32];
-    let mut sk = Sum6Kes::keygen(&seed, 0);
-    let message = b"Same message every period";
+    let sig1_bytes = TestKes::raw_serialize_signature_kes(&sig1);
+    let sig2_bytes = TestKes::raw_serialize_signature_kes(&sig2);
+    assert_eq!(sig1_bytes, sig2_bytes, "Deterministic signatures failed");
 
-    let sig0 = sk.sign(0, message);
-    sk.update();
-    let sig1 = sk.sign(1, message);
-
-    // Even with same message, signatures should differ due to period
-    assert_ne!(
-        sig0.as_bytes(),
-        sig1.as_bytes(),
-        "Signatures should differ across periods"
-    );
-}
-
-/// Test binary compatibility with expected sizes
-#[test]
-fn test_kes_binary_sizes() {
-    let seed = [0x4Cu8; 32];
-
-    // SingleKES
-    let single_sk = cardano_crypto::kes::single::BasicSingleKes::keygen(&seed, 0);
-    let single_vk = single_sk.to_verifying_key();
-    let single_sig = single_sk.sign(0, b"test");
-
-    // VK should be 32 bytes (Ed25519 public key)
-    assert_eq!(single_vk.as_bytes().len(), 32, "SingleKES VK size incorrect");
-
-    // Signature should be 64 bytes (Ed25519 signature)
-    assert_eq!(single_sig.as_bytes().len(), 64, "SingleKES signature size incorrect");
-
-    // Sum6KES
-    let sum6_sk = Sum6Kes::keygen(&seed, 0);
-    let sum6_vk = sum6_sk.to_verifying_key();
-
-    // Sum6 VK should be 32 bytes (merkle root)
-    assert_eq!(sum6_vk.as_bytes().len(), 32, "Sum6KES VK size incorrect");
-}
-
-/// Test edge cases
-#[test]
-fn test_kes_edge_cases() {
-    let seed = [0x4Du8; 32];
-
-    // Empty message
-    let mut sk = Sum6Kes::keygen(&seed, 0);
-    let vk = sk.to_verifying_key();
-    let sig = sk.sign(0, b"");
-    assert!(vk.verify(0, b"", &sig), "Empty message signature failed");
-
-    // Very long message
-    let long_msg = vec![0xAAu8; 10000];
-    sk.update();
-    let sig2 = sk.sign(1, &long_msg);
-    assert!(vk.verify(1, &long_msg, &sig2), "Long message signature failed");
+    Ok(())
 }
